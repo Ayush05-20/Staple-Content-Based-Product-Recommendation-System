@@ -1,0 +1,86 @@
+{% extends 'store/base.html' %}
+{% block title %}Staple &mdash; find your next favorite{% endblock %}
+
+{% block content %}
+
+{% if not query and not active_category %}
+<section class="masthead wrap">
+    <div class="masthead-text">
+        <h1>Household, health and personal care,<br>matched by what's actually in them.</h1>
+        <p>Every recommendation on this page comes from comparing product descriptions and ingredients &mdash; not from what other shoppers bought. Look at anything, from a cleaning spray to a shampoo to a multivitamin, and Staple finds what belongs next to it.</p>
+    </div>
+    <div class="masthead-tiles">
+        {% for p in page_obj.object_list|slice:":3" %}
+        <a href="{% url 'product_detail' p.id %}" class="masthead-tile tile-{{ forloop.counter }}">
+            <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy" onerror="this.style.display='none'">
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="wrap categories-row">
+    <a href="{% url 'home' %}" class="chip {% if not active_category %}chip-active{% endif %}">All</a>
+    {% for c in top_categories %}
+    <a href="?category={{ c|urlencode }}" class="chip {% if active_category == c %}chip-active{% endif %}">{{ c|title }}</a>
+    {% endfor %}
+</section>
+
+{% if query %}
+<div class="wrap results-label">Results for &ldquo;{{ query }}&rdquo;</div>
+{% elif active_category %}
+<div class="wrap results-label">{{ active_category|title }}</div>
+{% endif %}
+
+{% if personalized %}
+<section class="wrap personalized-row">
+    <h2>Picked to match what you've viewed</h2>
+    <div class="rail">
+        {% for p in personalized %}
+        <a href="{% url 'product_detail' p.id %}" class="rail-card">
+            <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy" onerror="this.src='https://placehold.co/300x300/F5F3EE/3F5D46?text=Staple'">
+            <span class="rail-name">{{ p.name|truncatechars:38 }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="wrap">
+    <div class="product-grid">
+        {% for p in page_obj %}
+        <a href="{% url 'product_detail' p.id %}" class="product-card">
+            <div class="product-image">
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy" onerror="this.src='https://placehold.co/400x400/F5F3EE/3F5D46?text=Staple'">
+            </div>
+            <div class="product-info">
+                <span class="product-category">{{ p.category_display }}</span>
+                <h3 class="product-name">{{ p.name|truncatechars:60 }}</h3>
+                {% if p.brand %}<span class="product-brand">{{ p.brand }}</span>{% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <p class="empty-state">No products match yet. Try a different search, or import the catalog first.</p>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if active_category %}&category={{ active_category }}{% endif %}">Previous</a>
+        {% endif %}
+        <span class="page-count">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if active_category %}&category={{ active_category }}{% endif %}">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+{% if not model_ready %}
+<div class="wrap notice-banner">
+    The similarity model hasn't been trained yet, so "similar products" will be empty. Run <code>python manage.py train_model</code> (or bring the .pkl files back from Colab) once your products are imported.
+</div>
+{% endif %}
+
+{% endblock %}

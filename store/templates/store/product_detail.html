@@ -1,0 +1,42 @@
+{% extends 'store/base.html' %}
+{% block title %}{{ product.name }} &mdash; Staple{% endblock %}
+
+{% block content %}
+<section class="wrap detail-layout">
+    <div class="detail-image">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}" onerror="this.src='https://placehold.co/600x600/F5F3EE/3F5D46?text=Staple'">
+    </div>
+    <div class="detail-info">
+        {% if product.brand %}<span class="detail-brand">{{ product.brand }}</span>{% endif %}
+        <h1>{{ product.name }}</h1>
+        <span class="detail-category">{{ product.category_display }}</span>
+
+        {% if product.description %}
+        <p class="detail-description">{{ product.description|truncatewords:60 }}</p>
+        {% endif %}
+
+    </div>
+</section>
+
+<section class="wrap similar-section">
+    <h2>Similar to this</h2>
+    {% if similar %}
+    <div class="product-grid">
+        {% for p in similar %}
+        <a href="{% url 'product_detail' p.id %}" class="product-card">
+            <div class="product-image">
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy" onerror="this.src='https://placehold.co/400x400/F5F3EE/3F5D46?text=Staple'">
+            </div>
+            <div class="product-info">
+                <span class="product-category">{{ p.category_display }}</span>
+                <h3 class="product-name">{{ p.name|truncatechars:60 }}</h3>
+                {% if p.brand %}<span class="product-brand">{{ p.brand }}</span>{% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No similar products yet &mdash; train the model after importing your catalog to enable this.</p>
+    {% endif %}
+</section>
+{% endblock %}
